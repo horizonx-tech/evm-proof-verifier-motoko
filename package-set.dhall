@@ -3,6 +3,11 @@ let Package =
     { name : Text, version : Text, repo : Text, dependencies : List Text }
 
 let additions = [
+  { name = "base"
+  , version = "moc-0.8.3"
+  , repo = "https://github.com/dfinity/motoko-base"
+  , dependencies = [] : List Text 
+  },
   { name = "merkle-patricia-trie"
   , version = "main"
   , repo = "https://github.com/f0i/merkle-patricia-trie.mo"
