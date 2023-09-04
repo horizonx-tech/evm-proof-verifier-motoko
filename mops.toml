@@ -1,0 +1,8 @@
+[dependencies]
+base = "https://github.com/dfinity/motoko-base#moc-0.9.7"
+rlp = "https://github.com/relaxed04/rlp-motoko#master"
+sha3 = "https://github.com/hanbu97/motoko-sha3#master"
+merkle-patricia-trie = "https://github.com/f0i/merkle-patricia-trie.mo#main"
+
+[dev-dependencies]
+matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0"
