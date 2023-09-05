@@ -11,11 +11,12 @@ import Hash "mo:merkle-patricia-trie/Hash";
 import TrieInternal "mo:merkle-patricia-trie/internal/TrieInternal";
 import Key "mo:merkle-patricia-trie/Key";
 import Proof "mo:merkle-patricia-trie/Proof";
-import Util "mo:merkle-patricia-trie/util";
 import Hex "mo:merkle-patricia-trie/util/Hex";
 import Keccak "mo:merkle-patricia-trie/util/Keccak";
 import RLP "mo:merkle-patricia-trie/util/rlp/encode";
 import Value "mo:merkle-patricia-trie/Value";
+
+import Util "Util";
 
 module {
 
@@ -63,7 +64,7 @@ module {
 
     let keyBytes = switch (Hex.toArray(keyText)) {
       case (#err(error)) return #err("Failed to parse to Bytes: " # keyText # ", err: " # error);
-      case (#ok(keyBytes)) keyBytes
+      case (#ok(keyBytes)) Util.padBytes(keyBytes, 32)
     };
     let keyArrHex = Hash.toHex(Keccak.keccak(keyBytes));
     let key = switch (Key.fromHex(keyArrHex)) {
