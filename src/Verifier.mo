@@ -27,9 +27,9 @@ module {
 
   public func verifyStorageProof(proof : StorageProof) : Bool {
     let _ = do ? {
-      let #ok(encoded) = RLP.encode(#Uint8Array(Buffer.fromArray(proof.value!))) else return false;
-      let _result = extractStorageValue(proof)!;
-      return Buffer.toArray(encoded) == Value.toArray(_result)
+      let #ok(value) = RLP.encode(#Uint8Array(Buffer.fromArray(proof.value!))) else return false;
+      let extracted = extractStorageValue(proof)!;
+      return Buffer.toArray(value) == Value.toArray(extracted)
     };
     false
   };
@@ -43,32 +43,30 @@ module {
   };
 
   public func toStorageProof(
-    _storageHash : Text,
-    _key : Text,
-    _proof : [Text],
-    _value : ?Text,
+    storageHashText : Text,
+    keyText : Text,
+    proofTextArr : [Text],
+    valueText : ?Text,
   ) : ?StorageProof {
-    let _ = do ? {
-      let storageHash = Hash.fromHex(_storageHash)!;
-      let #ok(_keyArr) = Hex.toArray(_key) else return null;
-      let key = Key.fromHex(Hash.toHex(Keccak.keccak(_keyArr)))!;
-      let _proofBuf = Buffer.Buffer<[Nat8]>(_proof.size());
-      for (itemText in _proof.vals()) {
-        let #ok(item) = Hex.toArray(itemText) else return null;
-        _proofBuf.add(item)
+    do ? {
+      let storageHash = Hash.fromHex(storageHashText)!;
+      let #ok(keyArrText) = Hex.toArray(keyText) else null!;
+      let key = Key.fromHex(Hash.toHex(Keccak.keccak(keyArrText)))!;
+      let proofBuf = Buffer.Buffer<[Nat8]>(proofTextArr.size());
+      for (itemText in proofTextArr.vals()) {
+        let #ok(item) = Hex.toArray(itemText) else null!;
+        proofBuf.add(item)
       };
 
-      let value = switch (_value) {
+      let value = switch (valueText) {
         case (null) null;
-        case (?_value) {
-          let #ok(value) = Hex.toArray(_value) else return null;
+        case (?valueText) {
+          let #ok(value) = Hex.toArray(valueText) else null!;
           ?value
         }
       };
 
-      return ?{ storageHash; key; proof = Buffer.toArray(_proofBuf); value }
-    };
-
-    null
+      return ?{ storageHash; key; proof = Buffer.toArray(proofBuf); value }
+    }
   }
 }
