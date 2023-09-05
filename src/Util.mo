@@ -6,11 +6,11 @@ module {
         if (bytes.size() >= size) return bytes;
         let buffer = Buffer.Buffer<Nat8>(size);
         for (i in Iter.range(0, size - bytes.size() - 1)) {
-            buffer.add(0)
+            buffer.add(0);
         };
         for (byte in bytes.vals()) {
-            buffer.add(byte)
+            buffer.add(byte);
         };
-        Buffer.toArray(buffer)
-    }
-}
+        Buffer.toArray(buffer);
+    };
+};

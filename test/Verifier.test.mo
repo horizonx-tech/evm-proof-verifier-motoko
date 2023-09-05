@@ -31,13 +31,13 @@ run(
         func() : Text {
           let storageProof = switch (Verifier.toStorageProof(storageHash, key, proof, null)) {
             case (#err(error)) return error;
-            case (#ok(storageProof)) storageProof
+            case (#ok(storageProof)) storageProof;
           };
           let value = switch (Verifier.extractStorageValue(storageProof)) {
             case (#err(error)) return error;
-            case (#ok(value)) value
+            case (#ok(value)) value;
           };
-          Value.toHex(value)
+          Value.toHex(value);
         },
         M.equals(T.text(valueEncoded)),
       ),
@@ -46,15 +46,15 @@ run(
         func() : Bool {
           let storageProof = switch (Verifier.toStorageProof(storageHash, key, proof, ?value)) {
             case (#err(error)) { Debug.print(error); return false };
-            case (#ok(storageProof)) storageProof
+            case (#ok(storageProof)) storageProof;
           };
           switch (Verifier.verifyStorageProof(storageProof)) {
             case (#err(error)) { Debug.print(error); false };
-            case (#ok(value)) value
-          }
+            case (#ok(value)) value;
+          };
         },
         M.equals(T.bool(true)),
       ),
     ],
   )
-)
+);
