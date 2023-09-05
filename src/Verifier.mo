@@ -4,6 +4,7 @@ import List "mo:base/List";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Option "mo:base/Option";
+import Result "mo:base/Result";
 import Text "mo:base/Text";
 import TrieMap "mo:base/TrieMap";
 import Hash "mo:merkle-patricia-trie/Hash";
@@ -25,20 +26,27 @@ module {
     value : ?[Nat8]
   };
 
-  public func verifyStorageProof(proof : StorageProof) : Bool {
-    let _ = do ? {
-      let #ok(value) = RLP.encode(#Uint8Array(Buffer.fromArray(proof.value!))) else return false;
-      let extracted = extractStorageValue(proof)!;
-      return Buffer.toArray(value) == Value.toArray(extracted)
+  public func verifyStorageProof(proof : StorageProof) : Result.Result<Bool, Text> {
+    let valueBytes = switch (proof.value) {
+      case (null) return #err("Proof.value required.");
+      case (?value) value
     };
-    false
+    let value = switch (RLP.encode(#Uint8Array(Buffer.fromArray(valueBytes)))) {
+      case (#err(error)) return #err(error);
+      case (#ok(value)) value
+    };
+    let extracted = switch (extractStorageValue(proof)) {
+      case (#err(error)) return #err(error);
+      case (#ok(value)) value
+    };
+    return #ok(Buffer.toArray(value) == Value.toArray(extracted))
   };
 
-  public func extractStorageValue(proof : StorageProof) : ?Value.Value {
+  public func extractStorageValue(proof : StorageProof) : Result.Result<Value.Value, Text> {
     switch (Proof.verify(proof.storageHash, proof.key, proof.proof)) {
-      case (#included(value)) ?value;
-      case (#excluded) null;
-      case (#invalidProof) null
+      case (#excluded) #err("excluded");
+      case (#invalidProof) #err("invalidProof");
+      case (#included(value)) #ok(value)
     }
   };
 
@@ -47,26 +55,40 @@ module {
     keyText : Text,
     proofTextArr : [Text],
     valueText : ?Text,
-  ) : ?StorageProof {
-    do ? {
-      let storageHash = Hash.fromHex(storageHashText)!;
-      let #ok(keyArrText) = Hex.toArray(keyText) else null!;
-      let key = Key.fromHex(Hash.toHex(Keccak.keccak(keyArrText)))!;
-      let proofBuf = Buffer.Buffer<[Nat8]>(proofTextArr.size());
-      for (itemText in proofTextArr.vals()) {
-        let #ok(item) = Hex.toArray(itemText) else null!;
-        proofBuf.add(item)
-      };
+  ) : Result.Result<StorageProof, Text> {
+    let storageHash = switch (Hash.fromHex(storageHashText)) {
+      case null return #err("Failed to parse to Hash: " # storageHashText);
+      case (?hex) hex
+    };
 
-      let value = switch (valueText) {
-        case (null) null;
-        case (?valueText) {
-          let #ok(value) = Hex.toArray(valueText) else null!;
-          ?value
+    let keyBytes = switch (Hex.toArray(keyText)) {
+      case (#err(error)) return #err("Failed to parse to Bytes: " # keyText # ", err: " # error);
+      case (#ok(keyBytes)) keyBytes
+    };
+    let keyArrHex = Hash.toHex(Keccak.keccak(keyBytes));
+    let key = switch (Key.fromHex(keyArrHex)) {
+      case null return #err("Failed to parse to Key: " # keyText);
+      case (?key) key
+    };
+    let proofBuf = Buffer.Buffer<[Nat8]>(proofTextArr.size());
+    for (itemText in proofTextArr.vals()) {
+      let item = switch (Hex.toArray(itemText)) {
+        case (#err(error)) return #err("Failed to parse to Bytes: " # itemText # ", err: " # error);
+        case (#ok(item)) item
+      };
+      proofBuf.add(item)
+    };
+
+    let value = switch (valueText) {
+      case (null) null;
+      case (?valueText) {
+        switch (Hex.toArray(valueText)) {
+          case (#err(error)) return #err("Failed to parse to Bytes: " # valueText # ", err: " # error);
+          case (#ok(value)) ?value
         }
-      };
+      }
+    };
 
-      return ?{ storageHash; key; proof = Buffer.toArray(proofBuf); value }
-    }
+    return #ok({ storageHash; key; proof = Buffer.toArray(proofBuf); value })
   }
 }

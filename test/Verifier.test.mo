@@ -31,23 +31,29 @@ run(
       testLazy(
         "extractStorageValue",
         func() : Text {
-          let _ = do ? {
-            let _proof = Verifier.toStorageProof(storageHash, key, proof, null);
-            let _value = Verifier.extractStorageValue(_proof!)!;
-            return Value.toHex(_value)
+          let storageProof = switch (Verifier.toStorageProof(storageHash, key, proof, null)) {
+            case (#err(error)) return error;
+            case (#ok(storageProof)) storageProof
           };
-          "Failed to parse from text."
+          let value = switch (Verifier.extractStorageValue(storageProof)) {
+            case (#err(error)) return error;
+            case (#ok(value)) value
+          };
+          Value.toHex(value)
         },
         M.equals(T.text(valueEncoded)),
       ),
       testLazy(
         "verifyProof: true",
         func() : Bool {
-          let _ = do ? {
-            let _proof = Verifier.toStorageProof(storageHash, key, proof, ?value);
-            return Verifier.verifyStorageProof(_proof!)
+          let storageProof = switch (Verifier.toStorageProof(storageHash, key, proof, ?value)) {
+            case (#err(error)) { Debug.print(error); return false };
+            case (#ok(storageProof)) storageProof
           };
-          false
+          switch (Verifier.verifyStorageProof(storageProof)) {
+            case (#err(error)) { Debug.print(error); false };
+            case (#ok(value)) value
+          }
         },
         M.equals(T.bool(true)),
       ),
