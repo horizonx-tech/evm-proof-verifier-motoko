@@ -15,6 +15,7 @@ import Value "mo:merkle-patricia-trie/Value";
 import RLP "mo:rlp";
 import RLPTypes "mo:rlp/types";
 
+import Utils "../src/utils";
 import Verifier "../src/Verifier";
 import { data1 } "TestData";
 
@@ -33,7 +34,7 @@ run(
       testLazy(
         "extractValue",
         func() : Text {
-          let storageProof = switch (Verifier.toMerkleProof(#storage, data1.storageHash, data1.storageProof[0].key, data1.storageProof[0].proof, null)) {
+          let storageProof = switch (Utils.toStorageProof(data1, 0)) {
             case (#err(error)) return error;
             case (#ok(storageProof)) storageProof;
           };
@@ -46,9 +47,9 @@ run(
         M.equals(T.text(encodeRLPHex(#string("0x" # data1.storageProof[0].value)))),
       ),
       testLazy(
-        "verifyProof: true",
+        "verifyMerkleProof: storage",
         func() : Bool {
-          let storageProof = switch (Verifier.toMerkleProof(#storage, data1.storageHash, data1.storageProof[0].key, data1.storageProof[0].proof, ? #string("0x" # data1.storageProof[0].value))) {
+          let storageProof = switch (Utils.toStorageProof(data1, 0)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(storageProof)) storageProof;
           };
@@ -60,10 +61,9 @@ run(
         M.equals(T.bool(true)),
       ),
       testLazy(
-        "verify Account Proof",
+        "verifyMerkleProof: account",
         func() : Bool {
-          let value = #List(Buffer.fromArray<RLPTypes.Input>([#string("0x" # data1.nonce), #string("0x" # data1.balance), #string("0x" # data1.storageHash), #string("0x" # data1.codeHash)]));
-          let storageProof = switch (Verifier.toMerkleProof(#account, data1.blockHeader.stateRoot, data1.address, data1.accountProof, ?value)) {
+          let storageProof = switch (Utils.toAccountProof(data1)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(storageProof)) storageProof;
           };
