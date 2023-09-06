@@ -10,56 +10,58 @@ import Hex "mo:merkle-patricia-trie/util/Hex";
 import Keccak "mo:merkle-patricia-trie/util/Keccak";
 import RLP "mo:merkle-patricia-trie/util/rlp/encode";
 import Value "mo:merkle-patricia-trie/Value";
+import RLPTypes "mo:rlp/types";
 
 import Util "Util";
 
 module {
+  type ProofType = {
+    #account;
+    #storage;
+  };
 
-  type StorageProof = {
-    storageHash : Hash.Hash;
+  type MerkleProof = {
+    rootHash : Hash.Hash;
     key : Key.Key;
     proof : Proof.Proof;
     value : ?[Nat8];
   };
 
-  public func verifyStorageProof(proof : StorageProof) : Result.Result<Bool, Text> {
-    let valueBytes = switch (proof.value) {
+  public func verifyMerkleProof(proof : MerkleProof) : Result.Result<Bool, Text> {
+    let value = switch (proof.value) {
       case (null) return #err("Proof.value required.");
       case (?value) value;
     };
-    let value = switch (RLP.encode(#Uint8Array(Buffer.fromArray(valueBytes)))) {
+    let extracted = switch (extractValue(proof)) {
       case (#err(error)) return #err(error);
       case (#ok(value)) value;
     };
-    let extracted = switch (extractStorageValue(proof)) {
-      case (#err(error)) return #err(error);
-      case (#ok(value)) value;
-    };
-    return #ok(Buffer.toArray(value) == Value.toArray(extracted));
+    return #ok(value == Value.toArray(extracted));
   };
 
-  public func extractStorageValue(proof : StorageProof) : Result.Result<Value.Value, Text> {
-    switch (Proof.verify(proof.storageHash, proof.key, proof.proof)) {
+  public func extractValue(proof : MerkleProof) : Result.Result<Value.Value, Text> {
+    switch (Proof.verify(proof.rootHash, proof.key, proof.proof)) {
       case (#excluded) #err("excluded");
       case (#invalidProof) #err("invalidProof");
       case (#included(value)) #ok(value);
     };
   };
 
-  public func toStorageProof(
-    storageHashText : Text,
+  public func toMerkleProof(
+    proofType : ProofType,
+    rootHashText : Text,
     keyText : Text,
     proofTextArr : [Text],
-    valueText : ?Text,
-  ) : Result.Result<StorageProof, Text> {
-    let storageHash = switch (Hash.fromHex(storageHashText)) {
-      case null return #err("Failed to parse to Hash: " # storageHashText);
+    valueInput : ?RLPTypes.Input,
+  ) : Result.Result<MerkleProof, Text> {
+    let rootHash = switch (Hash.fromHex(rootHashText)) {
+      case null return #err("Failed to parse to Hash: " # rootHashText);
       case (?hex) hex;
     };
 
     let keyBytes = switch (Hex.toArray(keyText)) {
       case (#err(error)) return #err("Failed to parse to Bytes: " # keyText # ", err: " # error);
-      case (#ok(keyBytes)) Util.padBytes(keyBytes, 32);
+      case (#ok(keyBytes)) if (proofType == #storage) Util.padBytes(keyBytes, 32) else keyBytes;
     };
     let keyArrHex = Hash.toHex(Keccak.keccak(keyBytes));
     let key = switch (Key.fromHex(keyArrHex)) {
@@ -75,17 +77,16 @@ module {
       proofBuf.add(item);
     };
 
-    let value = switch (valueText) {
+    let value = switch (valueInput) {
       case (null) null;
-      case (?valueText) {
-        switch (Hex.toArray(valueText)) {
-          case (#err(error)) return #err("Failed to parse to Bytes: " # valueText # ", err: " # error);
-          case (#ok(value)) ?value;
+      case (?valueInput) {
+        let value = switch (RLP.encode(valueInput)) {
+          case (#err(error)) return #err(error);
+          case (#ok(value)) ?Buffer.toArray(value);
         };
       };
     };
-
-    return #ok({ storageHash; key; proof = Buffer.toArray(proofBuf); value });
+    return #ok({ rootHash; key; proof = Buffer.toArray(proofBuf); value });
   };
 
 };

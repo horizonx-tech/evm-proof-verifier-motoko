@@ -1,54 +1,73 @@
+import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
+import Option "mo:base/Option";
+import Result "mo:base/Result";
 import M "mo:matchers/Matchers";
 import { run; suite; testLazy } "mo:matchers/Suite";
 import T "mo:matchers/Testable";
+import Hash "mo:merkle-patricia-trie/Hash";
+import TrieInternal "mo:merkle-patricia-trie/internal/TrieInternal";
+import Key "mo:merkle-patricia-trie/Key";
+import Trie "mo:merkle-patricia-trie/Trie";
 import Hex "mo:merkle-patricia-trie/util/Hex";
+import Keccak "mo:merkle-patricia-trie/util/Keccak";
 import Value "mo:merkle-patricia-trie/Value";
 import RLP "mo:rlp";
+import RLPTypes "mo:rlp/types";
 
 import Verifier "../src/Verifier";
+import { data1 } "TestData";
 
-let storageHash = "7b06875fff3432faf97d7beca74e157cfdcd4e0ffe11c23794129944c7bc6103";
-let key = "0";
-let proof = [
-  "f90211a0bce04b7d121f477ec4e744de2b170ba0a4a4f7f012bda469eb5dbd95d16de8daa03dd907ab997872d2cc5b59ffd386ac48b3f41982efb1c8dba4ffa41104cb8626a09f726358cd0680a9e936d5b85adb1c8d2804f5d4d3f5f82c722dec17416c2b77a00c32cd3b639bf95eedbf8082fd821d503d0d77d80ff22b7e1b77c8dc54d36a5ca03ac69c9ec3fe7878fe7588904c1389aeab51721be5448b8f7f4945af6f31ac44a05463abcfb2f5cc4cd052d0652ad692d56150fd780a73ba0353d5bf2dd29eb2f0a04831867297019f276d79073e23099104a43d6ad3a1397ede1f321b4b07066572a0e8129a9933ee3796e3a345a18e04c868876a8a6584409d056c654c1819df7994a0ffc411bc4794f1d1069c80132efc946010f8052aad36105f151b6eec7efecf08a05bcd09f64daf51c05e45091d81274f4cd4536a5f732af52f56bd1000a24f76d4a042da27749e26b5cb893f682a7f2e5e7fdbfdc71821b593174e00da93d4f500a1a0a31234a57a716b3b58848f18508b7a924d8a28c7cd7a16e460a212f7831e3ae2a0b111a2d7b0db32003699649ecef6b27115b2d8da3dc9c21fda1ed17996b29058a00c2f8909e795313fa9b7786279c832debe0609dfc98cd66b240987adddf5abd5a0df9e9efbcd2ebd4ed8a60512b949924aa11bb4169068f257754b3925065fe380a0f9ddd5acb42da8a45ab37b362fe893f1e30b87760a1097689d75fc6605ddc29c80",
-  "f90211a0541b5cd406548d350a221fcfd242558ecd841c4587b3cb6b09004dba959e8e88a0dbe88e0cb20eab044a01af25ba8f580de9c992a6fcdb35b8c05424bb5ff36eeca0bf469431cc0498c312dc83e64b661c2e4561bf46a1ac98b0e84c54271872b5e4a08dfeb12f3f1cf528fb4f4c42dce0939f5d7d2a4752f4303ed333def374c9625ba0c7493b8fc56febb6a6aad325205fdcef03aef1f9abea107becb994b6f2e22caaa06a3a3eef632f4d82c282b5e370aaddf8aea23ff16dbedd12487f046d61087adea06efff7599082d19a1ab85ba5f10c3b63826ad8a662eded18ea2204da6654e67aa0580f6b62454cb9c25ebd044ad7589029e7f4f6216510a5c1de7cbbab1ef8b060a0fa1cd307a36872bfea58a1493f855b2b4d9aae63bc95d85fa28f51f1168f8b04a06f189f2afad1858804009ffe8ac8700099b4fe66b7369a9374e3d63f152cc38ca017b45103ecdfe91f2eef7171f5ebc8175403cf01dc061bee91ef0297e77d3c4aa08c0da03e5099270ab8500ffd4cd909fa415c945ac50e7565dab01231ac8d04dba01974f2b96078d79168edb7590274b5aaa771aac0a19e600bc8577b7af9942b25a0e8ac01ceb885ef43d5804527a096a59c86c438973e81d4d6928a2bfa8fd28a62a02206d463a22a29bb8206d265c7e079218990ce4361d6b09fcdf7eb8a73417fa9a0e0c676557577b0f73d251b840dc4898846ed1bb0a30190d7d994ad686ffc450380",
-  "f90211a070384b8550b55972c1b91bef68e737d509c5c08cfd553cf77ec3591becd90b15a09b4a175487f02d1376a7f077d1725ee7af97b77ea80137e900058ee5818ec3b1a0ff1ed77efc063a754bd247844ec3d801a8270ceb450acbc0eef6f121fdbac0a8a052d100a05d8d3cbf8cc4bcb0a901be716507217515ba8601dc414e11ca4a5128a0b1c31adce8b237256e26922842e70481a62ccdd5053c93d807620d8caafb878aa057b3cb7d56a0e2bd8a57b28de5880f7b674fab2aa62659458f665e2d480496fba0fb4a50d813f038712e085cf3143393b10ad0e688a0d82eb800c9e83bb8c45436a069fa018fd01de521a04889d085a79889d2520e7f63e0b2b65687a12b4b563863a0f9e7beb4a37bd2f4e910d587b99f9b68b1f81c4f4f6c8618d20fc95944056ad4a0cd892a0a4947bcc39c47ea60713ac172546aacaa5d9d60063a9d5b0a3486bc18a05400e7dc63e41acffd25011e2edd878fa50555ba362802c4f9c230c061288263a0b8061368e1927fd55e95b596bb9c384b0f19d06363a8ac421d1d6963267988f1a0974868479a22744aa15a340de5e7bef7c009551eaaf28d6c44c85c84fcd5432da000759cc966ccc196855788322c1ea03cd122dbb0c6736ce61f1300fec122bf69a0831b9bcaa106d8b1f3f807a8731aac6b93ccf673ddaeaa84bbf56316ba1ba84aa07284034eef3ca8d8222fbb69f149d72d2b01f845a29111cd5e7387a3fa8ac8d080",
-  "f90211a073c929fe5df13e1d981caba4df482d4ddc61050ef276d069e384352cb30ad9baa036b49ce56495cb14516fed20ee5adc8e54c422e04a9babc1d63e07d115dfe852a029198c3cac5d3c552867a909b657a8d1d9893206ccd8ddb08be3ec02344e49cda0c6cb01982feae656174306110fa79e75e234cf6ea5040a1e29889e687849c269a0958ec7495ae43cc4009d1953e487a53ad85a39949740b2e8bc66390503648a03a05a9f36d825b90433f0bf5f8f40b104a09f3726420d7cdd8dd6d30b3a6de36c99a013d3655096d39e2e49595ceeef828a8e0313ee7f0c0254d6874f9dcaa321b5fca0339700cad42a315e42ad871974e2af9e1be1c7484ee9a6a8d23dcb22211984fda05dd5ad441a8871b05e93dcf78d9f858ba6d51947af1714330aff61a31afaf3c2a088ee01c7b4f82746669aa7d18e3de38d6e84da91d04f226b8c2441f5833f752ea0ab0725b4de94b0e28df543f07d2f430f3e2c19cc6532ac429d0c3c8924e795b9a0b6509a81d26ebaa26af55603f32048ee8dfc29ecbb01389c3d7aad497bbfe148a0cead8ef961b381e07cf55980fd45173b9d6737f99068eca243cdd8ea646d9cf7a0489664171b153ef6819cc06250e018a96aa94b62ab9c41205f2e7351b10c4f7ea0fb5bcbca94a3bc99eb8e432a89cd8dc17eeb2f18a6e777452e8f84ef1ea242d8a029351d7dcaeeadbd61ff56ff5d946e472f4e4abdfe3e62cf045b5ff283cd76c280",
-  "f90211a040d47b0951a83540d84c9d9e37b5c429282d7fe101d6712c3709a0eca26f62d2a007b301c9391cafab69075bfd7f974cbe5710b131c7c043cfc1c057c1f5d14e1ba035b39d9c881d267fdc2c6140503ca7610cd7bb73441bdaa6e6faf9a569d7e3bfa0e754f498b222a780d8561fe6df5c6ad55785987594d3978a5c67a52aea67d0fea0fab3e684d2e3e6b50afa887663ba079b647686057467aedb50e5492b147834fda0a4d9e375c64d07fccdec779b3453a99172ab711bf5b6ffe994fccc42adff8497a0402b8f91737db2b71e71f0fb2e94a692637edae63fd0659c84d5c27365b1392ca0456f8bcecba43a10d8bf80821c4bc91cafe49b69c7b58d5491e3dd6221ccaf68a0aa4d413420144405bb4f49d21cc36b58f38334fe63f8bc52c1b789e49b9eb575a0af10acaaaed1e1c3172531dd1dde53ec1f2b30b4a68fb5cdee2a68d5378a3600a0dc0a35c1aa839dfeb91128c3c76fd799390c9c947ce1062f19ff7a736514f760a080a74d8d4d1089d02ed2bf4cfbae53e721da31b78d330b71f09e28cd0b691c22a0a7b4ebf1cbdd28d3460cde8625c994053aea09c1d7f4afef7b2f2acfb155d5a9a0a510e18a1950bf9614b8ff1b462263e7463c6ea3eb5df135f72726dada204a8ba068038bbb640a89fab279b104f22d1058927b68aca003ea43550b243f0f2f9a3ea02084d4382c5d0e7959cc4e331e72ab728eecb4db8011ba967da52ba410fd47c180",
-  "f871a04051c185c76297d0754e01c94a37286d61c5a5a6558b2e435a7aeaa2b0bb330d8080808080a051e55005d844eaf99de8eed6680edfa6aaab6bdb91973d08171fd6df90d7b5d98080808080a0ac5007707c6f26dd2a3a19424132871f7ad21d2f0c0ae39dacc34ca7a3f36b6880808080",
-  "f8419e20d9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563a1a0577261707065642045746865720000000000000000000000000000000000001a",
-];
-let value = "577261707065642045746865720000000000000000000000000000000000001a";
-let valueEncoded = "a0577261707065642045746865720000000000000000000000000000000000001a";
+func encodeRLPHex(input : RLPTypes.Input) : Text {
+  let encoded = switch (RLP.encode(input)) {
+    case (#err(error)) Debug.trap("RLPEncode failed: " # error);
+    case (#ok(value)) value;
+  };
+  Hex.toText(Buffer.toArray(encoded));
+};
 
 run(
   suite(
     "Verifier",
     [
       testLazy(
-        "extractStorageValue",
+        "extractValue",
         func() : Text {
-          let storageProof = switch (Verifier.toStorageProof(storageHash, key, proof, null)) {
+          let storageProof = switch (Verifier.toMerkleProof(#storage, data1.storageHash, data1.storageProof[0].key, data1.storageProof[0].proof, null)) {
             case (#err(error)) return error;
             case (#ok(storageProof)) storageProof;
           };
-          let value = switch (Verifier.extractStorageValue(storageProof)) {
+          let value = switch (Verifier.extractValue(storageProof)) {
             case (#err(error)) return error;
             case (#ok(value)) value;
           };
           Value.toHex(value);
         },
-        M.equals(T.text(valueEncoded)),
+        M.equals(T.text(encodeRLPHex(#string("0x" # data1.storageProof[0].value)))),
       ),
       testLazy(
         "verifyProof: true",
         func() : Bool {
-          let storageProof = switch (Verifier.toStorageProof(storageHash, key, proof, ?value)) {
+          let storageProof = switch (Verifier.toMerkleProof(#storage, data1.storageHash, data1.storageProof[0].key, data1.storageProof[0].proof, ? #string("0x" # data1.storageProof[0].value))) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(storageProof)) storageProof;
           };
-          switch (Verifier.verifyStorageProof(storageProof)) {
+          switch (Verifier.verifyMerkleProof(storageProof)) {
+            case (#err(error)) { Debug.print(error); false };
+            case (#ok(value)) value;
+          };
+        },
+        M.equals(T.bool(true)),
+      ),
+      testLazy(
+        "verify Account Proof",
+        func() : Bool {
+          let value = #List(Buffer.fromArray<RLPTypes.Input>([#string("0x" # data1.nonce), #string("0x" # data1.balance), #string("0x" # data1.storageHash), #string("0x" # data1.codeHash)]));
+          let storageProof = switch (Verifier.toMerkleProof(#account, data1.blockHeader.stateRoot, data1.address, data1.accountProof, ?value)) {
+            case (#err(error)) { Debug.print(error); return false };
+            case (#ok(storageProof)) storageProof;
+          };
+          switch (Verifier.verifyMerkleProof(storageProof)) {
             case (#err(error)) { Debug.print(error); false };
             case (#ok(value)) value;
           };
