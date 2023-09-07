@@ -1,5 +1,6 @@
 import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
+import Nat8 "mo:base/Nat8";
 import Result "mo:base/Result";
 import Hash "mo:merkle-patricia-trie/Hash";
 import Key "mo:merkle-patricia-trie/Key";
@@ -40,6 +41,42 @@ module {
     ) : Result.Result<Types.MerkleProof, Text> {
         let target = input.storageProof[index];
         toMerkleProof(#storage, input.storageHash, target.key, target.proof, ? #string("0x" # target.value));
+    };
+
+    public func toTxProof(
+        input : {
+            transactionsRoot : Text;
+            proof : [[Text]];
+            txIndex : Text;
+        }
+    ) : Result.Result<Types.MerkleProof, Text> {
+        let rootHash = switch (Hash.fromHex(input.transactionsRoot)) {
+            case null return #err("Failed to parse to Hash: " # input.transactionsRoot);
+            case (?hash) hash;
+        };
+        let key = switch (Key.fromHex(input.txIndex)) {
+            case null return #err("Failed to parse to Key: " # input.txIndex);
+            case (?key) key;
+        };
+
+        let proof = Buffer.Buffer<[Nat8]>(input.proof.size());
+        for (arr in input.proof.vals()) {
+            let value = Buffer.Buffer<RLPTypes.Input>(input.proof.size());
+            for (item in arr.vals()) {
+                value.add(#string("0x" # item));
+            };
+            switch (RLP.encode(#List(value))) {
+                case (#err(error)) return #err(error);
+                case (#ok(encoded)) {
+                    proof.add(Buffer.toArray(encoded));
+                };
+            };
+        };
+        let value = switch (Hex.toArray(input.proof[input.proof.size() -1][1])) {
+            case (#err(error)) return #err(error);
+            case (#ok(value)) ?value;
+        };
+        #ok({ rootHash; key; proof = Buffer.toArray(proof); value });
     };
 
     public func toMerkleProof(

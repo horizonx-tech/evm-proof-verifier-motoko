@@ -6,6 +6,7 @@ module {
     public type ProofType = {
         #account;
         #storage;
+        #transaction;
     };
 
     public type MerkleProof = {

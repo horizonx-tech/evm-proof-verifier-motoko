@@ -22,6 +22,12 @@ module {
         }];
     };
 
+    type TransactionProofInputText = {
+        transactionsRoot : Text;
+        proof : [[Text]];
+        txIndex : Text;
+    };
+
     public let input1_account : AccountProofInputText = {
         accountProof = [
             "f90211a01723219012b6c6a13c61a35e0a9aa3124111787e9046fd7ff689e9eb5cfb19f7a028d7739ffecae17943a4b74f27eef41a59a71c22c731a3d02e32c472c5a4a803a0422e9dfbc01f91ae29ab328641e15876374e8b98ee5aa7cdad5a4311ba6c5543a028e652ad86702676da41adb534d0b9a7e618c624168deb62082b2e3b9179fc9aa0d601beded189b31ac21b52323bf7cf6d36b271b098444944074304618a8d5e4fa0e81d226afa2efae49f05ee5e75c713975f61cad94b0ab4bc304402081c3c3b2ea08010e00deaf87387483fb067e3782cbc6ee812a0cc44c656960885ef421685eca0fc0decba8a4cfcdd6073ced5cfcf5e9ded4da7157be1ebeac4cc33866ae3d3b8a0ee6e6b70eedc07c29eb3808956dfada2e99ba7caa8c8dcb6b9c9f6488f293a51a0bdf6f5554316c3d163eb0ac1694d7d89a6b796e9d5cf3877501273e0dde87f2ea089e934c22a5143f2d4a9e0bc47d3db786adc076db8fe3c431742fd1feb66691ba0dbefe9151e3cad322de7fd78cab49e52ceec63bc1d5596243168c9ce15c4816ea03a793d0f3a3d8dd7550ac45a17409d0616536eb87adc66484e37934d8d01d651a09b3f620fa9c09cc0cc2471c541361bd87377b37dd04f45b59133c95fa887ce5aa0bb50ed776a8714411d63c3c314ac8024f866fc42f876559e0bd3c099d387479ea01bbac666e5cd7750d1266094aca6811628443c0fb7bef18fd2bcec32899fde4c80",
@@ -61,5 +67,53 @@ module {
             },
         ];
     };
+
+    public let input1_tx : TransactionProofInputText = {
+        transactionsRoot = "c1a6875d70fdeb57f9351657c6fe6fdc70ca2859c88fed76f4446ab8d1fb9dc4";
+        txIndex = "3b";
+        proof = [
+            [
+                "f158a112496949b2965b51c6b76cfb7b4de1243b172282556c58255ee1658d35",
+                "2a8158252c7a0dc651d5fdfa4155886037c966b20e48ec3d41fc90656fde09dc",
+                "48ea531a22a880833e33bcfdc43c9224d37dd1c763f98aae9daed5dcc71f82d9",
+                "3b6ff1d87b93da08c083178fab3c89557a78cee3eff7f14100120a640f05cba4",
+                "de22b4581310991af482e53bf236b90d71d3b846a81fc059f664d84691c597fc",
+                "8b369cbf9bc3e0f86dd69f6c99d39e61b4ea61f17b51ef17e8ce232a2db8644a",
+                "",
+                "",
+                "954a184fba2ca2dcf2f65b743ca57157d853d5bd1a5f1ead6562662ff70a9737",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ],
+            [
+                "1a79152bdf6e6b7cb02713931acd103fea13e4a5ccb5cbdce9910afa4fc8765a",
+                "97262f11e3c680589ecf5641896d1c0d24d22b3fb7f48449831ee689df207487",
+                "bdaea63cd2d06419792dc8aa395c7dc67a0d18db2756cf6e47edad8139e73557",
+                "1713f698da152ddc997954507dceb08cf6b52163e9e3b5eef887d2b1a97c634c",
+                "c3d7ac107b1602cd5eeb230da4aa0e8c622b2777daadd66527a99445ebeac478",
+                "fab6e15464d01cb8a60d8e930f134347cd8d66959ede638147861f23df50decf",
+                "8f52cc0ee51258ec49752313525fb09f7a218a2b263c83072a5a57d6f018f289",
+                "c7c199c460274436348cdb9da85401703bfbfeeebc69737c7b3aa6fe7e51560e",
+                "f52560b4151878f82d57cf5ae9dd9c3194977eba05ae04220d8956190a0330b0",
+                "363ef8d61d85119b3577068ea9d6768f7abbbc877b226fdd89c6b6e355af6739",
+                "f8d70810f990f50d4e344c1e0b93199fcd1ca820fd5c99dd667279a812c8630c",
+                "9a091d22661ee8de864ceab2fcae6b92e4a5bca95a09d5c5bb77ea6bad5a74f0",
+                "ea0f60260973885355653e6270ec3657070bc2bc76b992a1ddaeecccee7dcce6",
+                "577cd92ae42e430adc6da3272f47551c5bd0a963079b02e2bdb2d91ae6333e29",
+                "4177cc2134072f0dafb7410cb94554dc334b14231d7a75e71bfeb90a0c6f1e7d",
+                "fed7bda54a8d97dc390cae31a3c38a635c9b992a9c6724482711a20aa0e7b48e",
+                "",
+            ],
+            [
+                "20",
+                "02f88f016c8405f5e1008503c90b5b3c828cbb94c02aaa39b223fe8d0a0e5c4f27ead9083c756cc280a42e1a7d4d00000000000000000000000000000000000000000000000004c67d207b364000c001a02772b765f2107427747d8ccce83b518a7498aaf83043dec25a65dbc5ebf1a184a06a4cfaf082e8c869e62c7e263f7262cb8635dea2482d7b609881b457baec102f",
+            ],
+        ];
     };
 };
