@@ -1,24 +1,28 @@
 import Text "mo:base/Text";
 
 module {
-    type ProofInputText = {
+    type AccountProofInputText = {
         address : Text;
         nonce : Text;
         balance : Text;
         codeHash : Text;
         storageHash : Text;
         accountProof : [Text];
-        storageProof : [{
-            key : Text;
-            proof : [Text];
-            value : Text;
-        }];
         blockHeader : {
             stateRoot : Text;
         };
     };
 
-    public let data1 : ProofInputText = {
+    type StorageProofInputText = {
+        storageHash : Text;
+        storageProof : [{
+            key : Text;
+            proof : [Text];
+            value : Text;
+        }];
+    };
+
+    public let input1_account : AccountProofInputText = {
         accountProof = [
             "f90211a01723219012b6c6a13c61a35e0a9aa3124111787e9046fd7ff689e9eb5cfb19f7a028d7739ffecae17943a4b74f27eef41a59a71c22c731a3d02e32c472c5a4a803a0422e9dfbc01f91ae29ab328641e15876374e8b98ee5aa7cdad5a4311ba6c5543a028e652ad86702676da41adb534d0b9a7e618c624168deb62082b2e3b9179fc9aa0d601beded189b31ac21b52323bf7cf6d36b271b098444944074304618a8d5e4fa0e81d226afa2efae49f05ee5e75c713975f61cad94b0ab4bc304402081c3c3b2ea08010e00deaf87387483fb067e3782cbc6ee812a0cc44c656960885ef421685eca0fc0decba8a4cfcdd6073ced5cfcf5e9ded4da7157be1ebeac4cc33866ae3d3b8a0ee6e6b70eedc07c29eb3808956dfada2e99ba7caa8c8dcb6b9c9f6488f293a51a0bdf6f5554316c3d163eb0ac1694d7d89a6b796e9d5cf3877501273e0dde87f2ea089e934c22a5143f2d4a9e0bc47d3db786adc076db8fe3c431742fd1feb66691ba0dbefe9151e3cad322de7fd78cab49e52ceec63bc1d5596243168c9ce15c4816ea03a793d0f3a3d8dd7550ac45a17409d0616536eb87adc66484e37934d8d01d651a09b3f620fa9c09cc0cc2471c541361bd87377b37dd04f45b59133c95fa887ce5aa0bb50ed776a8714411d63c3c314ac8024f866fc42f876559e0bd3c099d387479ea01bbac666e5cd7750d1266094aca6811628443c0fb7bef18fd2bcec32899fde4c80",
             "f90211a098f00d27f94fa00a25f8cb2662695e8ef001b816d58accc63ac449768d86a473a070d8fbbbf0d056f71d62b42c4a9ce0d729d6267d7e87437e7266d7e99ef27526a0fdba821ed8833ff704b0aa1e35385cd0f4cf0d87a8697d27c176f107b79eb0f9a0a0d0ee104733e06e26ed93c5f68bbac07cb52ae0014fbf5a6a13f9783776cc4da09075ab6602898558dcea4851ee9fcc875dcc780b88056af65b14c1391b7bb504a0cf7a7f4837b6e807c926e68a9a122f3e4eae73c1ccae2ee1468205f98c55d069a01cb46fab8c5f868789a915ea80ddda6d791f91bdf4f99d5683e849511a10b7a1a06049a64466ba29de70b23a99a890b7d0e8f68fb762275d92b11d10c3f1884e96a0e432c9e05733e3b44a8273c2000e86670536e5d735b6760c96e36d978f413980a0f5df7f2ecbb192806468e2abc70420c0897e63af1c54ed206b14f38bb57328fca089abe171733f92fa7861c215b566fa7b8ad76cfb1f6f4789f48d864c55d259a6a08b71cf1a42f82eebf0340d48b29bdc75f14dec50fc93ad96b838f0a33d764db3a00cd28196fadade16e2583d69a1b9428dc92df8b53a4cd89d4a286bc9d824252ba06929ee67e66210f9222b10dd911403ba84df5606110a846e4660173a38294028a07813a795cfa49eed76a788e216f844ef7bd19ba8b5fe2e65a645714b7c4a14d8a082a28a439e28e8e1265da6b9e13a0dbfa605e9a1f4248acb647ab97e741996cd80",
@@ -33,6 +37,13 @@ module {
         balance = "29911459a6bad3f57c29d";
         codeHash = "d0a06b12ac47863b5c7be4185c2deaad1c61557033f56c7d4ea74429cbb25e23";
         nonce = "1";
+        storageHash = "1f2e806224e52656a133918f35ad746b63d3d672e67096a8a3d60915529d370b";
+        blockHeader = {
+            stateRoot = "9fe081de6fa6212a5c5e62d36ad7d95cadc376d29181a372a4a5e44200953ce0";
+        };
+    };
+
+    public let input1_storage : StorageProofInputText = {
         storageHash = "1f2e806224e52656a133918f35ad746b63d3d672e67096a8a3d60915529d370b";
         storageProof = [
             {
@@ -49,8 +60,6 @@ module {
                 value = "577261707065642045746865720000000000000000000000000000000000001a";
             },
         ];
-        blockHeader = {
-            stateRoot = "9fe081de6fa6212a5c5e62d36ad7d95cadc376d29181a372a4a5e44200953ce0";
-        };
+    };
     };
 };

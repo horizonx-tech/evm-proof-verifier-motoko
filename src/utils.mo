@@ -51,7 +51,7 @@ module {
     ) : Result.Result<Types.MerkleProof, Text> {
         let rootHash = switch (Hash.fromHex(rootHashText)) {
             case null return #err("Failed to parse to Hash: " # rootHashText);
-            case (?hex) hex;
+            case (?hash) hash;
         };
 
         let keyBytes = switch (Hex.toArray(keyText)) {
@@ -75,7 +75,7 @@ module {
         let value = switch (valueInput) {
             case (null) null;
             case (?valueInput) {
-                let value = switch (RLP.encode(valueInput)) {
+                switch (RLP.encode(valueInput)) {
                     case (#err(error)) return #err(error);
                     case (#ok(value)) ?Buffer.toArray(value);
                 };

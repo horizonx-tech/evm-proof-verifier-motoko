@@ -17,7 +17,7 @@ import RLPTypes "mo:rlp/types";
 
 import Utils "../src/utils";
 import Verifier "../src/Verifier";
-import { data1 } "TestData";
+import { input1_account; input1_storage } "TestData";
 
 func encodeRLPHex(input : RLPTypes.Input) : Text {
   let encoded = switch (RLP.encode(input)) {
@@ -34,7 +34,7 @@ run(
       testLazy(
         "extractValue",
         func() : Text {
-          let storageProof = switch (Utils.toStorageProof(data1, 0)) {
+          let storageProof = switch (Utils.toStorageProof(input1_storage, 0)) {
             case (#err(error)) return error;
             case (#ok(storageProof)) storageProof;
           };
@@ -44,12 +44,12 @@ run(
           };
           Value.toHex(value);
         },
-        M.equals(T.text(encodeRLPHex(#string("0x" # data1.storageProof[0].value)))),
+        M.equals(T.text(encodeRLPHex(#string("0x" # input1_storage.storageProof[0].value)))),
       ),
       testLazy(
         "verifyMerkleProof: storage",
         func() : Bool {
-          let storageProof = switch (Utils.toStorageProof(data1, 0)) {
+          let storageProof = switch (Utils.toStorageProof(input1_storage, 0)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(storageProof)) storageProof;
           };
@@ -63,11 +63,11 @@ run(
       testLazy(
         "verifyMerkleProof: account",
         func() : Bool {
-          let storageProof = switch (Utils.toAccountProof(data1)) {
+          let accountProof = switch (Utils.toAccountProof(input1_account)) {
             case (#err(error)) { Debug.print(error); return false };
-            case (#ok(storageProof)) storageProof;
+            case (#ok(accountProof)) accountProof;
           };
-          switch (Verifier.verifyMerkleProof(storageProof)) {
+          switch (Verifier.verifyMerkleProof(accountProof)) {
             case (#err(error)) { Debug.print(error); false };
             case (#ok(value)) value;
           };
