@@ -178,41 +178,49 @@ module {
     let logsBuf = Buffer.Buffer<Types.Log>(logsRlp.size());
     for (i in Iter.range(0, logsRlp.size() - 1)) {
       let #Nested(values) = logsRlp.get(i) else return #err("log[" # Nat.toText(i) # "]");
-
-      let log = {
-        var contractAddress : [Nat8] = [];
-        var topics : [[Nat8]] = [];
-        var data : [Nat8] = [];
+      let log = switch (decodeReceiptLog(values)) {
+        case (#err(error)) return #err("log[" # Nat.toText(i) # "]." # error);
+        case (#ok(log)) log;
       };
-      label l for (j in Iter.range(0, values.size() - 1)) {
-        switch (j) {
-          case (0) {
-            let #Uint8Array(value) = values.get(j) else return #err("log[" # Nat.toText(i) # "]" # ".contractAddress");
-            log.contractAddress := Buffer.toArray(value);
-          };
-          case (1) {
-            let #Nested(topics) = values.get(j) else return #err("log[" # Nat.toText(i) # "]" # ".topics");
-            let topicsBuf = Buffer.Buffer<[Nat8]>(topics.size());
-            for (k in Iter.range(0, topics.size() - 1)) {
-              let #Uint8Array(value) = topics.get(k) else return #err("log[" # Nat.toText(i) # "]" # ".topic[" # Nat.toText(k) # "]");
-              topicsBuf.add(Buffer.toArray(value));
-            };
-            log.topics := Buffer.toArray(topicsBuf);
-          };
-          case (2) {
-            let #Uint8Array(value) = values.get(j) else return #err("log[" # Nat.toText(i) # "]" # ".data");
-            log.data := Buffer.toArray(value);
-          };
-          case (_) { break l };
-        };
-      };
-      logsBuf.add({
-        contractAddress = log.contractAddress;
-        topics = log.topics;
-        data = log.data;
-      });
+      logsBuf.add(log);
     };
 
     #ok(Buffer.toArray(logsBuf));
+  };
+
+  public func decodeReceiptLog(values : Buffer.Buffer<RLPTypes.Decoded>) : Result.Result<Types.Log, Text> {
+    let log = {
+      var contractAddress : [Nat8] = [];
+      var topics : [[Nat8]] = [];
+      var data : [Nat8] = [];
+    };
+    for (i in Iter.range(0, Nat.min(2, values.size() - 1))) {
+      switch (i) {
+        case (0) {
+          let #Uint8Array(value) = values.get(i) else return #err("contractAddress");
+          log.contractAddress := Buffer.toArray(value);
+        };
+        case (1) {
+          let #Nested(topics) = values.get(i) else return #err("topics");
+          let topicsBuf = Buffer.Buffer<[Nat8]>(topics.size());
+          for (j in Iter.range(0, topics.size() - 1)) {
+            let #Uint8Array(value) = topics.get(j) else return #err("topics[" # Nat.toText(j) # "]");
+            topicsBuf.add(Buffer.toArray(value));
+          };
+          log.topics := Buffer.toArray(topicsBuf);
+        };
+        case (2) {
+          let #Uint8Array(value) = values.get(i) else return #err("data");
+          log.data := Buffer.toArray(value);
+        };
+        case (_) {};
+      };
+    };
+
+    #ok({
+      contractAddress = log.contractAddress;
+      topics = log.topics;
+      data = log.data;
+    });
   };
 };

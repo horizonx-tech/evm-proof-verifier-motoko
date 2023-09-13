@@ -28,7 +28,7 @@ module {
 
     public func toNat16(bytes : [Nat8]) : Nat16 {
         var result : Nat16 = 0;
-        for (i in Iter.range(0, 1)) {
+        for (i in Iter.range(0, Nat.min(1, bytes.size() -1))) {
             result += Nat16.fromNat(Nat8.toNat(bytes.get(i))) << Nat16.fromNat((8 * (bytes.size() - 1 - i)));
         };
         result;

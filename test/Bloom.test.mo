@@ -42,10 +42,19 @@ run(
         func() : Bool {
           let bloom = Hex.toArrayUnsafe(expected1_receipt.logsBloom);
 
-          M.assertThat(Bloom.test(bloom, textToKeccakBytes(expected1_receipt.logs[0].topics[0])), M.equals(T.bool(true)));
-          M.assertThat(Bloom.test(bloom, Utils.padBytes(Hex.toArrayUnsafe(expected1_receipt.logs[0].topics[1]), 32)), M.equals(T.bool(true)));
+          M.assertThat(
+            Bloom.test(bloom, textToKeccakBytes(expected1_receipt.logs[0].topics[0])),
+            M.equals(T.bool(true)),
+          );
+          M.assertThat(
+            Bloom.test(bloom, Utils.padBytes(Hex.toArrayUnsafe(expected1_receipt.logs[0].topics[1]), 32)),
+            M.equals(T.bool(true)),
+          );
 
-          M.assertThat(Bloom.test(bloom, Hex.toArrayUnsafe(expected1_receipt.logs[0].topics[1])), M.equals(T.bool(false)));
+          M.assertThat(
+            Bloom.test(bloom, Hex.toArrayUnsafe(expected1_receipt.logs[0].topics[1])),
+            M.equals(T.bool(false)),
+          );
 
           true;
         },
