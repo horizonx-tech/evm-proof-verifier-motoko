@@ -82,48 +82,6 @@ module {
     #ok({ rootHash; key; proof = Buffer.toArray(proof); value });
   };
 
-  public func toMerkleProof(
-    proofType : Types.ProofType,
-    rootHashText : Text,
-    keyText : Text,
-    proofTextArr : [Text],
-    valueInput : ?RLPTypes.Input,
-  ) : Result.Result<Types.MerkleProof, Text> {
-    let rootHash = switch (Hash.fromHex(rootHashText)) {
-      case null return #err("Failed to parse to Hash: " # rootHashText);
-      case (?hash) hash;
-    };
-
-    let keyBytes = switch (Hex.toArray(keyText)) {
-      case (#err(error)) return #err("Failed to parse to Bytes: " # keyText # ", err: " # error);
-      case (#ok(keyBytes)) if (proofType == #storage) Utils.padBytes(keyBytes, 32) else keyBytes;
-    };
-    let keyArrHex = Hash.toHex(Keccak.keccak(keyBytes));
-    let key = switch (Key.fromHex(keyArrHex)) {
-      case null return #err("Failed to parse to Key: " # keyText);
-      case (?key) key;
-    };
-    let proofBuf = Buffer.Buffer<[Nat8]>(proofTextArr.size());
-    for (itemText in proofTextArr.vals()) {
-      let item = switch (Hex.toArray(itemText)) {
-        case (#err(error)) return #err("Failed to parse to Bytes: " # itemText # ", err: " # error);
-        case (#ok(item)) item;
-      };
-      proofBuf.add(item);
-    };
-
-    let value = switch (valueInput) {
-      case (null) null;
-      case (?valueInput) {
-        switch (RLP.encode(valueInput)) {
-          case (#err(error)) return #err(error);
-          case (#ok(value)) ?Buffer.toArray(value);
-        };
-      };
-    };
-    return #ok({ rootHash; key; proof = Buffer.toArray(proofBuf); value });
-  };
-
   public func decodeReceipt(bytes : [Nat8]) : Result.Result<Types.Receipt, Text> {
     let buffer = Buffer.fromArray<Nat8>(bytes);
     // remove TransactionType: https://eips.ethereum.org/EIPS/eip-2718
@@ -222,5 +180,47 @@ module {
       topics = log.topics;
       data = log.data;
     });
+  };
+
+  func toMerkleProof(
+    proofType : Types.ProofType,
+    rootHashText : Text,
+    keyText : Text,
+    proofTextArr : [Text],
+    valueInput : ?RLPTypes.Input,
+  ) : Result.Result<Types.MerkleProof, Text> {
+    let rootHash = switch (Hash.fromHex(rootHashText)) {
+      case null return #err("Failed to parse to Hash: " # rootHashText);
+      case (?hash) hash;
+    };
+
+    let keyBytes = switch (Hex.toArray(keyText)) {
+      case (#err(error)) return #err("Failed to parse to Bytes: " # keyText # ", err: " # error);
+      case (#ok(keyBytes)) if (proofType == #storage) Utils.padBytes(keyBytes, 32) else keyBytes;
+    };
+    let keyArrHex = Hash.toHex(Keccak.keccak(keyBytes));
+    let key = switch (Key.fromHex(keyArrHex)) {
+      case null return #err("Failed to parse to Key: " # keyText);
+      case (?key) key;
+    };
+    let proofBuf = Buffer.Buffer<[Nat8]>(proofTextArr.size());
+    for (itemText in proofTextArr.vals()) {
+      let item = switch (Hex.toArray(itemText)) {
+        case (#err(error)) return #err("Failed to parse to Bytes: " # itemText # ", err: " # error);
+        case (#ok(item)) item;
+      };
+      proofBuf.add(item);
+    };
+
+    let value = switch (valueInput) {
+      case (null) null;
+      case (?valueInput) {
+        switch (RLP.encode(valueInput)) {
+          case (#err(error)) return #err(error);
+          case (#ok(value)) ?Buffer.toArray(value);
+        };
+      };
+    };
+    return #ok({ rootHash; key; proof = Buffer.toArray(proofBuf); value });
   };
 };
