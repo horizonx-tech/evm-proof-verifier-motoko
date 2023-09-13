@@ -1,3 +1,9 @@
+[package]
+name = "evm-proof-verifier"
+version = "0.0.1"
+description = "EVM Proof Verifier in Motoko"
+repository = "https://github.com/horizonx-tech/evm-proof-verifier-motoko"
+
 [dependencies]
 base = "https://github.com/dfinity/motoko-base#moc-0.8.3"
 rlp = "https://github.com/horizonx-tech/rlp-motoko#91d85c8286fbda7d3d27e21557c07a90ccfe21ab"
