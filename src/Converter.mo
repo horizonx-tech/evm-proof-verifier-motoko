@@ -15,15 +15,7 @@ import Utils "Utils";
 
 module {
   public func toAccountProof(
-    input : {
-      address : Text;
-      nonce : Text;
-      balance : Text;
-      codeHash : Text;
-      storageHash : Text;
-      accountProof : [Text];
-      blockHeader : { stateRoot : Text };
-    }
+    input : Types.AccountProofInputText
   ) : Result.Result<Types.MerkleProof, Text> {
     let value = Buffer.fromArray<RLPTypes.Input>([
       #string("0x" # input.nonce),
@@ -35,10 +27,7 @@ module {
   };
 
   public func toStorageProof(
-    input : {
-      storageHash : Text;
-      storageProof : [{ key : Text; proof : [Text]; value : Text }];
-    },
+    input : Types.StorageProofInputText,
     index : Nat,
   ) : Result.Result<Types.MerkleProof, Text> {
     let target = input.storageProof[index];
@@ -46,11 +35,7 @@ module {
   };
 
   public func toTxProof(
-    input : {
-      rootHash : Text;
-      proof : [[Text]];
-      txIndex : Text;
-    }
+    input : Types.TransactionProofInputText
   ) : Result.Result<Types.MerkleProof, Text> {
     let rootHash = switch (Hash.fromHex(input.rootHash)) {
       case null return #err("Failed to parse to Hash: " # input.rootHash);

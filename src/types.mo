@@ -28,4 +28,31 @@ module {
     topics : [[Nat8]];
     data : [Nat8];
   };
+
+  public type AccountProofInputText = {
+    address : Text;
+    nonce : Text;
+    balance : Text;
+    codeHash : Text;
+    storageHash : Text;
+    accountProof : [Text];
+    blockHeader : {
+      stateRoot : Text;
+    };
+  };
+
+  public type StorageProofInputText = {
+    storageHash : Text;
+    storageProof : [{
+      key : Text;
+      proof : [Text];
+      value : Text;
+    }];
+  };
+
+  public type TransactionProofInputText = {
+    rootHash : Text;
+    proof : [[Text]];
+    txIndex : Text;
+  };
 };
