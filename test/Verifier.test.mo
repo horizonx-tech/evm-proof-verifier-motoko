@@ -15,9 +15,9 @@ import Value "mo:merkle-patricia-trie/Value";
 import RLP "mo:rlp";
 import RLPTypes "mo:rlp/types";
 
-import Utils "../src/utils";
+import Utils "../src/Utils";
 import Verifier "../src/Verifier";
-import { input1_account; input1_storage; input1_tx } "TestData";
+import { input1_account; input1_receipt; input1_storage; input1_tx } "TestData";
 
 func encodeRLPHex(input : RLPTypes.Input) : Text {
   let encoded = switch (RLP.encode(input)) {
@@ -78,6 +78,20 @@ run(
         "verifyMerkleProof: transaction",
         func() : Bool {
           let txProof = switch (Utils.toTxProof(input1_tx)) {
+            case (#err(error)) { Debug.print(error); return false };
+            case (#ok(txProof)) txProof;
+          };
+          switch (Verifier.verifyMerkleProof(txProof)) {
+            case (#err(error)) { Debug.print(error); false };
+            case (#ok(value)) value;
+          };
+        },
+        M.equals(T.bool(true)),
+      ),
+      testLazy(
+        "verifyMerkleProof: receipt",
+        func() : Bool {
+          let txProof = switch (Utils.toTxProof(input1_receipt)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(txProof)) txProof;
           };

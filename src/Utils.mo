@@ -1,5 +1,7 @@
+import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
+import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Result "mo:base/Result";
 import Hash "mo:merkle-patricia-trie/Hash";
@@ -9,6 +11,7 @@ import Keccak "mo:merkle-patricia-trie/util/Keccak";
 import RLP "mo:merkle-patricia-trie/util/rlp/encode";
 import RLPTypes "mo:rlp/types";
 
+import RLPDecode "./decode";
 import Types "types";
 
 module {
@@ -45,13 +48,13 @@ module {
 
     public func toTxProof(
         input : {
-            transactionsRoot : Text;
+            rootHash : Text;
             proof : [[Text]];
             txIndex : Text;
         }
     ) : Result.Result<Types.MerkleProof, Text> {
-        let rootHash = switch (Hash.fromHex(input.transactionsRoot)) {
-            case null return #err("Failed to parse to Hash: " # input.transactionsRoot);
+        let rootHash = switch (Hash.fromHex(input.rootHash)) {
+            case null return #err("Failed to parse to Hash: " # input.rootHash);
             case (?hash) hash;
         };
         let key = switch (Key.fromHex(input.txIndex)) {
@@ -131,5 +134,97 @@ module {
             buffer.add(byte);
         };
         Buffer.toArray(buffer);
+    };
+
+    public func decodeReceipt(bytes : [Nat8]) : Result.Result<Types.Receipt, Text> {
+        let buffer = Buffer.fromArray<Nat8>(bytes);
+        // remove TransactionType: https://eips.ethereum.org/EIPS/eip-2718
+        if (buffer.get(0) <= 0x7f) { let _ = buffer.remove(0) };
+
+        let values = switch (RLPDecode.decode(#Uint8Array(buffer))) {
+            case (#ok(#Nested(decoded))) decoded;
+            case (#err(error)) return #err("Failed to decode receipt: " # error);
+            case (_) return #err("Input is not receipt: " # Hex.toText(bytes));
+        };
+
+        let receipt = {
+            var status : Nat8 = 0;
+            var cumulativeGasUsed : [Nat8] = [];
+            var logsBloom : [Nat8] = [];
+            var logs : [Types.Log] = [];
+        };
+        label l for (i in Iter.range(0, values.size() - 1)) {
+            switch (i) {
+                case (0) {
+                    let #Uint8Array(value) = values.get(i) else return #err("Failed to parse status");
+                    receipt.status := value.get(0);
+                };
+                case (1) {
+                    let #Uint8Array(value) = values.get(i) else return #err("Failed to parse cumulativeGasUsed");
+                    receipt.cumulativeGasUsed := Buffer.toArray(value);
+                };
+                case (2) {
+                    let #Uint8Array(value) = values.get(i) else return #err("Failed to parse logsBloom");
+                    receipt.logsBloom := Buffer.toArray(value);
+                };
+                case (3) {
+                    let #Nested(logsRlp) = values.get(i) else return #err("Failed to parse logs");
+                    switch (decodeReceiptLogs(logsRlp)) {
+                        case (#err(error)) return #err("Failed to decode logs: " # error);
+                        case (#ok(logs)) receipt.logs := logs;
+                    };
+                };
+                case (_) { break l };
+            };
+        };
+
+        #ok({
+            status = receipt.status;
+            cumulativeGasUsed = receipt.cumulativeGasUsed;
+            logsBloom = receipt.logsBloom;
+            logs = receipt.logs;
+        });
+    };
+
+    public func decodeReceiptLogs(logsRlp : Buffer.Buffer<RLPTypes.Decoded>) : Result.Result<[Types.Log], Text> {
+        let logsBuf = Buffer.Buffer<Types.Log>(logsRlp.size());
+        for (i in Iter.range(0, logsRlp.size() - 1)) {
+            let #Nested(values) = logsRlp.get(i) else return #err("log[" # Nat.toText(i) # "]");
+
+            let log = {
+                var contractAddress : [Nat8] = [];
+                var topics : [[Nat8]] = [];
+                var data : [Nat8] = [];
+            };
+            label l for (j in Iter.range(0, values.size() - 1)) {
+                switch (j) {
+                    case (0) {
+                        let #Uint8Array(value) = values.get(j) else return #err("log[" # Nat.toText(i) # "]" # ".contractAddress");
+                        log.contractAddress := Buffer.toArray(value);
+                    };
+                    case (1) {
+                        let #Nested(topics) = values.get(j) else return #err("log[" # Nat.toText(i) # "]" # ".topics");
+                        let topicsBuf = Buffer.Buffer<[Nat8]>(topics.size());
+                        for (k in Iter.range(0, topics.size() - 1)) {
+                            let #Uint8Array(value) = topics.get(k) else return #err("log[" # Nat.toText(i) # "]" # ".topic[" # Nat.toText(k) # "]");
+                            topicsBuf.add(Buffer.toArray(value));
+                        };
+                        log.topics := Buffer.toArray(topicsBuf);
+                    };
+                    case (2) {
+                        let #Uint8Array(value) = values.get(j) else return #err("log[" # Nat.toText(i) # "]" # ".data");
+                        log.data := Buffer.toArray(value);
+                    };
+                    case (_) { break l };
+                };
+            };
+            logsBuf.add({
+                contractAddress = log.contractAddress;
+                topics = log.topics;
+                data = log.data;
+            });
+        };
+
+        #ok(Buffer.toArray(logsBuf));
     };
 };

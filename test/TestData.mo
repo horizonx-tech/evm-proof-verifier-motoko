@@ -1,4 +1,7 @@
 import Text "mo:base/Text";
+import Hex "mo:merkle-patricia-trie/util/Hex";
+
+import Types "../src/types";
 
 module {
     type AccountProofInputText = {
@@ -23,9 +26,26 @@ module {
     };
 
     type TransactionProofInputText = {
-        transactionsRoot : Text;
+        rootHash : Text;
         proof : [[Text]];
         txIndex : Text;
+    };
+
+    type TransactionReceiptProofInputText = {
+        rootHash : Text;
+        proof : [[Text]];
+        txIndex : Text;
+    };
+
+    type ReceiptText = {
+        status : Text;
+        cumulativeGasUsed : Text;
+        logsBloom : Text;
+        logs : [{
+            contractAddress : Text;
+            topics : [Text];
+            data : Text;
+        }];
     };
 
     public let input1_account : AccountProofInputText = {
@@ -69,7 +89,7 @@ module {
     };
 
     public let input1_tx : TransactionProofInputText = {
-        transactionsRoot = "c1a6875d70fdeb57f9351657c6fe6fdc70ca2859c88fed76f4446ab8d1fb9dc4";
+        rootHash = "c1a6875d70fdeb57f9351657c6fe6fdc70ca2859c88fed76f4446ab8d1fb9dc4";
         txIndex = "3b";
         proof = [
             [
@@ -114,6 +134,71 @@ module {
                 "20",
                 "02f88f016c8405f5e1008503c90b5b3c828cbb94c02aaa39b223fe8d0a0e5c4f27ead9083c756cc280a42e1a7d4d00000000000000000000000000000000000000000000000004c67d207b364000c001a02772b765f2107427747d8ccce83b518a7498aaf83043dec25a65dbc5ebf1a184a06a4cfaf082e8c869e62c7e263f7262cb8635dea2482d7b609881b457baec102f",
             ],
+        ];
+    };
+
+    public let input1_receipt : TransactionReceiptProofInputText = {
+        rootHash = "0c12852778ac807db13dca75802031a2a72f932d5e24514c0b3488bbeaf2887b";
+        txIndex = "3b";
+        proof = [
+            [
+                "1080e069c10b1f394c6de77e32059684c0fd839f9c868b465aafd2d82e698ab7",
+                "380de14773a02fdfc369f4d1f84a5575a8af5a326011eafdd987eccb96cbaea7",
+                "559a98a165ef57276ca355567754b9bc1b8fdf043fe4d44625154a29d8214fe7",
+                "e3ce7fe12fc14b4f93d539a947ebd77f63e1371503c1326d2c20d861fff261e3",
+                "2e0e746009d4aaf28c01e7ee559c53db582c3b36fd1b8fefb82bc9230da5f95c",
+                "7006f507370767adfb9f4c656e03de8632fae6db1df0caeeda9c05bfe66f0b20",
+                "",
+                "",
+                "027a9f4c7db58f868029892ea6aaf50b84c05e2ba84519dc3412dc2c44a232d7",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ],
+            [
+                "2a826fb861d36746530c580fdaeee13dcff611ddaf485608dad96ed39726656b",
+                "56750e156e1d1fa83de79aa7813d4ee563ca9499ade97fd98f5c7970a4b8542f",
+                "4dd91d6d039b815abd0b2ac3203301b30944c4bdcac417f1771875377d12657a",
+                "dc88550dcf70c34c7bf36e54703f489d1f44d93f81c3ea6263ed71f6f34054e5",
+                "e0e4f12b3d2a266dc961a0f49effce253af65198bb3bb4642087a5965226d487",
+                "81210de3bfe942d66ec70283bdc5a4d26340585d33f3ca578b5105a05c9f083a",
+                "88903ab6717be615b609a3ed4dd3bdb6430144c8fbccf8bb40a7ac40225fdb46",
+                "37be329ae72deeac97bc99cf67cf3289ed569e9bfe0b55ce0134d2192f862f11",
+                "0044fb298fda514d50b77eec37c06b312fa5a15ddc21ac05f04fe32bf3460b16",
+                "0a0a5b5b3a777513d07e1cafbecdc3be1b998c53baad6a9ba42d8eb24ccfda66",
+                "d924f16617478d858bf7d1946da409c75f60f1bd66f929d60b845be7a7dc734b",
+                "1a170df0467b4607ed42e17b716e31670b9214b07d502b43384a8972c260abc4",
+                "61e1748763d0cceaeae32f8583897c4c16aadac4031c1a244ff4af92cea59f08",
+                "f49279ceaa1b4dbeeaa0af1b3e43364ce9102055e2b86a2fe872d1d1f2064d70",
+                "b3749597822f1419f7c51b395410cd8bf4614bc152b692dd16fe90d6eadf1c76",
+                "2476f30d05e76b45302263cd76708e6a14083cdade0c77413c03e5f56e97a71d",
+                "",
+            ],
+            [
+                "20",
+                "02f9018601834c8e8bb9010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000080000000000000000000000000000000000000000000000000000000000000000400000000000000000000080000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000002000000000000200000000000000000000000000000000000000000000010000000000000f87cf87a94c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2f842a07fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65a00000000000000000000000006e84da5b4c60ad738c6fab100b21e954c56ea21fa000000000000000000000000000000000000000000000000004c67d207b364000",
+            ],
+        ];
+    };
+
+    public let expected1_receipt : ReceiptText = {
+        status = "01";
+        cumulativeGasUsed = "4c8e8b";
+        logsBloom = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000080000000000000000000000000000000000000000000000000000000000000000400000000000000000000080000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000002000000000000200000000000000000000000000000000000000000000010000000000000";
+        logs = [
+            {
+                contractAddress = "c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+                topics = [
+                    "Withdrawal(address,uint256)",
+                    "6E84Da5b4c60Ad738c6FAb100b21e954c56Ea21F",
+                ];
+                data = "00000000000000000000000000000000000000000000000004c67d207b364000";
+            },
         ];
     };
 };

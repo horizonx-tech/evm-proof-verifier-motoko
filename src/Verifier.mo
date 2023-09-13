@@ -13,7 +13,6 @@ import Value "mo:merkle-patricia-trie/Value";
 import RLPTypes "mo:rlp/types";
 
 import Types "types";
-import Util "utils";
 
 module {
   public func verifyMerkleProof(proof : Types.MerkleProof) : Result.Result<Bool, Text> {
