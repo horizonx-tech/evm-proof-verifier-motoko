@@ -85,3 +85,33 @@ All test cases can be executed using the Makefile.
 ```bash
 make test
 ```
+
+## Scripts
+
+Helper scripts to get proof data.
+
+```
+git clone https://github.com/horizonx-tech/evm-proof-verifier-motoko
+cd evm-proof-verifier-motoko
+
+pnpm install
+cp .env.example .env
+pnpm run ts-node scripts/getProof.ts
+```
+
+You need to fill env vars and parameters before running scripts,
+
+`.env`
+
+```
+RPC_URL=required
+TRIM_0X_PREFIX=true/false
+```
+
+`./scripts/getProof.ts`
+
+```typescript
+const address = "0x...";
+const keys = ["0x..."];
+const block = "latest"; // tag or number or hash
+```
