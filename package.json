@@ -1,11 +1,9 @@
 {
   "name": "evm-proof-verifier-motoko",
   "version": "0.0.1",
-  "description": "EVM Proof Verifeir in Motoko",
+  "description": "EVM Proof Verifier in Motoko",
   "private": "true",
   "scripts": {
-    "prettier:check": "npx -p prettier -p pretty-quick pretty-quick --check",
-    "prettier:format": "npx -p prettier -p pretty-quick pretty-quick",
     "test": "mops test --reporter files",
     "postinstall": "mops install"
   },
@@ -18,12 +16,6 @@
   },
   "homepage": "https://github.com/horizonx-tech/evm-proof-verifier-motoko#readme",
   "devDependencies": {
-    "fast-glob": "^3.2.12",
-    "husky": "^8.0.2",
-    "ic-mops": "^0.22.0",
-    "mo-dev": "^0.9.0",
-    "prettier": "^2.8.1",
-    "prettier-plugin-motoko": "^0.2.3",
-    "pretty-quick": "^3.1.3"
+    "ic-mops": "^0.22.0"
   }
 }
