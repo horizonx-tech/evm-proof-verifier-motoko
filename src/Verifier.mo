@@ -1,16 +1,7 @@
-import Buffer "mo:base/Buffer";
-import Nat8 "mo:base/Nat8";
-import Option "mo:base/Option";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
-import Hash "mo:merkle-patricia-trie/Hash";
-import Key "mo:merkle-patricia-trie/Key";
 import Proof "mo:merkle-patricia-trie/Proof";
-import Hex "mo:merkle-patricia-trie/util/Hex";
-import Keccak "mo:merkle-patricia-trie/util/Keccak";
-import RLP "mo:merkle-patricia-trie/util/rlp/encode";
 import Value "mo:merkle-patricia-trie/Value";
-import RLPTypes "mo:rlp/types";
 
 import Types "types";
 

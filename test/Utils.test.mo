@@ -1,16 +1,13 @@
-import Blob "mo:base/Blob";
-import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";
-import Text "mo:base/Text";
 import M "mo:matchers/Matchers";
 import { run; suite; testLazy } "mo:matchers/Suite";
 import T "mo:matchers/Testable";
-import Hash "mo:merkle-patricia-trie/Hash";
 import Hex "mo:merkle-patricia-trie/util/Hex";
 import { keccak } "mo:merkle-patricia-trie/util/Keccak";
 
+import Converter "../src/Converter";
 import Types "../src/types";
 import Utils "../src/Utils";
 import { expected1_receipt; input1_receipt } "TestData";
@@ -18,7 +15,7 @@ import { textToKeccakBytes } "TestUtils";
 
 run(
     suite(
-        "Utils",
+        "Converter",
         [
             testLazy(
                 "decodeReceipt",
@@ -30,7 +27,7 @@ run(
                         };
                         case (#ok(value)) value;
                     };
-                    let decoded = switch (Utils.decodeReceipt(bytes)) {
+                    let decoded = switch (Converter.decodeReceipt(bytes)) {
                         case (#err(error)) {
                             Debug.print(debug_show (error));
                             return null;

@@ -1,14 +1,12 @@
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
-import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat16 "mo:base/Nat16";
-import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import Hash "mo:merkle-patricia-trie/Hash";
 import { keccak } "mo:merkle-patricia-trie/util/Keccak";
 
 import Types "types";
+import Utils "Utils";
 
 module {
 
@@ -24,7 +22,7 @@ module {
   let bloomLength = 256;
 
   public func create(logs : [Types.Log]) : [Nat8] {
-    let buf = filledBuffer<Nat8>(bloomLength, 0);
+    let buf = Utils.filledBuffer<Nat8>(bloomLength, 0);
     for (log in logs.vals()) {
       add(buf, log.contractAddress);
       for (topic in log.topics.vals()) {
@@ -52,25 +50,9 @@ module {
       v1 = 1 << (hashed[1] & 0x7);
       v2 = 1 << (hashed[3] & 0x7);
       v3 = 1 << (hashed[5] & 0x7);
-      i1 = bloomLength - Nat16.toNat((toNat16(hashed) & 0x7ff) >> 3) - 1;
-      i2 = bloomLength - Nat16.toNat((toNat16([hashed[2], hashed[3]]) & 0x7ff) >> 3) - 1;
-      i3 = bloomLength - Nat16.toNat((toNat16([hashed[4], hashed[5]]) & 0x7ff) >> 3) - 1;
+      i1 = bloomLength - Nat16.toNat((Utils.toNat16(hashed) & 0x7ff) >> 3) - 1;
+      i2 = bloomLength - Nat16.toNat((Utils.toNat16([hashed[2], hashed[3]]) & 0x7ff) >> 3) - 1;
+      i3 = bloomLength - Nat16.toNat((Utils.toNat16([hashed[4], hashed[5]]) & 0x7ff) >> 3) - 1;
     };
-  };
-
-  func filledBuffer<X>(len : Nat, value : X) : Buffer.Buffer<X> {
-    let buf = Buffer.Buffer<X>(bloomLength);
-    for (_ in Iter.range(0, bloomLength - 1)) {
-      buf.add(value);
-    };
-    buf;
-  };
-
-  func toNat16(bytes : [Nat8]) : Nat16 {
-    var result : Nat16 = 0;
-    for (i in Iter.range(0, 1)) {
-      result += Nat16.fromNat(Nat8.toNat(bytes.get(i))) << Nat16.fromNat((8 * (bytes.size() - 1 - i)));
-    };
-    result;
   };
 };

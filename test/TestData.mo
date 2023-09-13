@@ -1,5 +1,4 @@
 import Text "mo:base/Text";
-import Hex "mo:merkle-patricia-trie/util/Hex";
 
 import Types "../src/types";
 

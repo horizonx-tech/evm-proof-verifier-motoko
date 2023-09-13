@@ -1,31 +1,13 @@
-import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
-import Option "mo:base/Option";
-import Result "mo:base/Result";
 import M "mo:matchers/Matchers";
 import { run; suite; testLazy } "mo:matchers/Suite";
 import T "mo:matchers/Testable";
-import Hash "mo:merkle-patricia-trie/Hash";
-import TrieInternal "mo:merkle-patricia-trie/internal/TrieInternal";
-import Key "mo:merkle-patricia-trie/Key";
-import Trie "mo:merkle-patricia-trie/Trie";
-import Hex "mo:merkle-patricia-trie/util/Hex";
-import Keccak "mo:merkle-patricia-trie/util/Keccak";
 import Value "mo:merkle-patricia-trie/Value";
-import RLP "mo:rlp";
-import RLPTypes "mo:rlp/types";
 
-import Utils "../src/Utils";
+import Converter "../src/Converter";
 import Verifier "../src/Verifier";
 import { input1_account; input1_receipt; input1_storage; input1_tx } "TestData";
-
-func encodeRLPHex(input : RLPTypes.Input) : Text {
-  let encoded = switch (RLP.encode(input)) {
-    case (#err(error)) Debug.trap("RLPEncode failed: " # error);
-    case (#ok(value)) value;
-  };
-  Hex.toText(Buffer.toArray(encoded));
-};
+import { encodeRLPHex } "TestUtils";
 
 run(
   suite(
@@ -34,7 +16,7 @@ run(
       testLazy(
         "extractValue",
         func() : Text {
-          let storageProof = switch (Utils.toStorageProof(input1_storage, 0)) {
+          let storageProof = switch (Converter.toStorageProof(input1_storage, 0)) {
             case (#err(error)) return error;
             case (#ok(storageProof)) storageProof;
           };
@@ -49,7 +31,7 @@ run(
       testLazy(
         "verifyMerkleProof: storage",
         func() : Bool {
-          let storageProof = switch (Utils.toStorageProof(input1_storage, 0)) {
+          let storageProof = switch (Converter.toStorageProof(input1_storage, 0)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(storageProof)) storageProof;
           };
@@ -63,7 +45,7 @@ run(
       testLazy(
         "verifyMerkleProof: account",
         func() : Bool {
-          let accountProof = switch (Utils.toAccountProof(input1_account)) {
+          let accountProof = switch (Converter.toAccountProof(input1_account)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(accountProof)) accountProof;
           };
@@ -77,7 +59,7 @@ run(
       testLazy(
         "verifyMerkleProof: transaction",
         func() : Bool {
-          let txProof = switch (Utils.toTxProof(input1_tx)) {
+          let txProof = switch (Converter.toTxProof(input1_tx)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(txProof)) txProof;
           };
@@ -91,7 +73,7 @@ run(
       testLazy(
         "verifyMerkleProof: receipt",
         func() : Bool {
-          let txProof = switch (Utils.toTxProof(input1_receipt)) {
+          let txProof = switch (Converter.toTxProof(input1_receipt)) {
             case (#err(error)) { Debug.print(error); return false };
             case (#ok(txProof)) txProof;
           };
