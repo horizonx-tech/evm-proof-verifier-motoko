@@ -132,7 +132,7 @@ module {
     let values = switch (RLPDecode.decode(#Uint8Array(buffer))) {
       case (#ok(#Nested(decoded))) decoded;
       case (#err(error)) return #err("Failed to decode receipt: " # error);
-      case (_) return #err("Input is not receipt: " # Hex.toText(bytes));
+      case (_) return #err("Input is not valid receipt: " # Hex.toText(bytes));
     };
 
     let receipt = {
@@ -144,19 +144,19 @@ module {
     label l for (i in Iter.range(0, values.size() - 1)) {
       switch (i) {
         case (0) {
-          let #Uint8Array(value) = values.get(i) else return #err("Failed to parse status");
+          let #Uint8Array(value) = values.get(i) else return #err("Failed to decode status");
           receipt.status := value.get(0);
         };
         case (1) {
-          let #Uint8Array(value) = values.get(i) else return #err("Failed to parse cumulativeGasUsed");
+          let #Uint8Array(value) = values.get(i) else return #err("Failed to decode cumulativeGasUsed");
           receipt.cumulativeGasUsed := Buffer.toArray(value);
         };
         case (2) {
-          let #Uint8Array(value) = values.get(i) else return #err("Failed to parse logsBloom");
+          let #Uint8Array(value) = values.get(i) else return #err("Failed to decode logsBloom");
           receipt.logsBloom := Buffer.toArray(value);
         };
         case (3) {
-          let #Nested(logsRlp) = values.get(i) else return #err("Failed to parse logs");
+          let #Nested(logsRlp) = values.get(i) else return #err("Failed to decode logs");
           switch (decodeReceiptLogs(logsRlp)) {
             case (#err(error)) return #err("Failed to decode logs: " # error);
             case (#ok(logs)) receipt.logs := logs;
