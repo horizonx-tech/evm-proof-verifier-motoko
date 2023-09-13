@@ -7,10 +7,9 @@ import Hash "mo:merkle-patricia-trie/Hash";
 import Key "mo:merkle-patricia-trie/Key";
 import Hex "mo:merkle-patricia-trie/util/Hex";
 import Keccak "mo:merkle-patricia-trie/util/Keccak";
-import RLP "mo:merkle-patricia-trie/util/rlp/encode";
+import RLP "mo:rlp";
 import RLPTypes "mo:rlp/types";
 
-import RLPDecode "./decode";
 import Types "types";
 import Utils "Utils";
 
@@ -87,7 +86,7 @@ module {
     // remove TransactionType: https://eips.ethereum.org/EIPS/eip-2718
     if (buffer.get(0) <= 0x7f) { let _ = buffer.remove(0) };
 
-    let values = switch (RLPDecode.decode(#Uint8Array(buffer))) {
+    let values = switch (RLP.decode(#Uint8Array(buffer))) {
       case (#ok(#Nested(decoded))) decoded;
       case (#err(error)) return #err("Failed to decode receipt: " # error);
       case (_) return #err("Input is not valid receipt: " # Hex.toText(bytes));

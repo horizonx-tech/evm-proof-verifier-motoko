@@ -1,6 +1,6 @@
 [dependencies]
 base = "https://github.com/dfinity/motoko-base#moc-0.8.3"
-rlp = "https://github.com/relaxed04/rlp-motoko#master"
+rlp = "https://github.com/horizonx-tech/rlp-motoko#91d85c8286fbda7d3d27e21557c07a90ccfe21ab"
 sha3 = "https://github.com/hanbu97/motoko-sha3#master"
 merkle-patricia-trie = "https://github.com/f0i/merkle-patricia-trie.mo#main"
 

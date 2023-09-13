@@ -14,8 +14,8 @@ let additions = [
   , dependencies = [ "base", "rlp", "sha3" ],
   },
   { name = "rlp"
-  , version = "master"
-  , repo = "https://github.com/relaxed04/rlp-motoko"
+  , version = "91d85c8286fbda7d3d27e21557c07a90ccfe21ab"
+  , repo = "https://github.com/horizonx-tech/rlp-motoko"
   , dependencies = [] : List Text
   },
   { name = "sha3"
