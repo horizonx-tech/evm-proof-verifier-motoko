@@ -17,7 +17,7 @@ Add the repository to `package-set.dhall`:
 let additions = [
   { name = "evm-proof-verifier"
   , version = "main"
-  , repo = "https://github.com/horizonx-tech/evm-proof-verifier"
+  , repo = "https://github.com/horizonx-tech/evm-proof-verifier-motoko"
   , dependencies = [ "base", "rlp", "sha3", "merkle-patricia-trie" ],
   },
   { name = "merkle-patricia-trie"
@@ -64,8 +64,8 @@ import Utils "mo:evm-proof-verifier/Utils";
 let #ok(storageProof) = Converter.toStorageProof(
     // proof data
     {
-      storageHash: "1f2e8062...",
-      stroageProof: [{key: "0", proof: ["f90211a0c1c1ab..."], value: "5772..."}, ... ],
+      storageHash = "1f2e8062...",
+      stroageProof = [{key = "0", proof = ["f90211a0c1c1ab..."], value = "5772..."}, ... ],
     },
     // index of proof to verify
     0
